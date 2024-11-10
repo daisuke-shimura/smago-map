@@ -1,22 +1,10 @@
 import { useEffect, useState } from "react";
-import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
+import { MapContainer, TileLayer, Marker, Popup, useMap, Circle, useMapEvents } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import DeleteIcon from "@mui/icons-material/Delete";
 import L from "leaflet";
 import { LatLngExpression } from "leaflet";
 
-const locations: [number, number][] = [
-    [35.7137757, 139.7969451],
-    [35.7143071, 139.7963245],
-    [35.7144253, 139.7953445],
-    [35.714748, 139.7952627],
-    [35.7111474, 139.7965377],
-    [35.7119654, 139.7963265],
-    [35.7124165, 139.7963355],
-    [35.7128409, 139.7963711],
-    [35.7128488, 139.7960204],
-    [35.7112601, 139.7963721],
-];
 const zoomLevel = 20;
 
 interface MapComponentProps {
@@ -24,6 +12,7 @@ interface MapComponentProps {
 }
 
 const MapComponent: React.FC<MapComponentProps> = ({ position }) => {
+    // マップの位置を変更
     const map = useMap();
 
     useEffect(() => {
@@ -35,20 +24,40 @@ const MapComponent: React.FC<MapComponentProps> = ({ position }) => {
     return null;
 };
 
+const MapClickHandler: React.FC<{ setClickedPosition: (pos: LatLngExpression) => void }> = ({ setClickedPosition }) => {
+    useMapEvents({
+        click: (e) => {
+            setClickedPosition([e.latlng.lat, e.latlng.lng]);
+            console.log("Clicked Position:", e.latlng);
+        },
+    });
+    return null;
+};
 
 const Map: React.FC = () => {
     const [position, setPosition] = useState<LatLngExpression | null>(null);
+    const [trashcans, setTrashcans] = useState<Array<{ id: number; latitude: number; longitude: number }>>([]);
+    const [requests, setRequests] = useState<Array<{ id: number; latitude: number; longitude: number }>>([]);
+    const [clickedPosition, setClickedPosition] = useState<LatLngExpression | null>(null);
 
     useEffect(() => {
-        // http://localhost:8000/にアクセスできるかチェックする
-        fetch("http://localhost:8000/api")
-            .then((response) => response.text())
-            .then((text) => console.log("Server Response:", text))
-            .catch((error) => console.error("Server Error:", error));
-    }
-    , []);
+        // FastAPIのエンドポイントからゴミ箱の位置を取得
+        fetch("http://localhost:8000/api/trashcans")
+            .then((response) => response.json())
+            .then((data) => setTrashcans(data.trashcans))
+            .catch((error) => console.error("Error fetching trashcans:", error));
+    }, []);
 
     useEffect(() => {
+        // FastAPIのエンドポイントからリクエストの位置を取得
+        fetch("http://localhost:8000/api/requests")
+            .then((response) => response.json())
+            .then((data) => setRequests(data.requests))
+            .catch((error) => console.error("Error fetching requests:", error));
+    }, []);
+
+    useEffect(() => {
+        // ユーザーの位置を取得
         navigator.geolocation.getCurrentPosition(
             (pos) => {
                 const { latitude, longitude } = pos.coords;
@@ -88,15 +97,27 @@ const Map: React.FC = () => {
                         >
                             <Popup>Me</Popup>
                         </Marker>
-                        <MapComponent position={position} />
+                        {/* <MapComponent position={position} /> */}
                     </>
                 )}
-                {/* 配列の各地点にマーカーを配置 */}
-                {locations.map((position, index) => (
-                    <Marker key={index} position={position}>
-                        <Popup>地点 {index + 1}</Popup>
+                {/* ゴミ箱の位置にマーカーを配置 */}
+                {trashcans.map((trashcan) => (
+                    <Marker key={trashcan.id} position={[trashcan.latitude, trashcan.longitude]}>
+                        <Popup>ゴミ箱 {trashcan.id}</Popup>
                     </Marker>
                 ))}
+                {/* リクエストの位置に点を配置 */}
+                {requests.map((request) => (
+                    <Circle
+                        key={request.id}
+                        center={[request.latitude, request.longitude]}
+                        radius={1}
+                        color="red"
+                    >
+                        <Popup>リクエスト {request.id}</Popup>
+                    </Circle>
+                ))}
+                <MapClickHandler setClickedPosition={setClickedPosition} />
             </MapContainer>
 
             {/* 右下にボタンを配置 */}
@@ -115,7 +136,13 @@ const Map: React.FC = () => {
                     padding: "12px",
                     zIndex: 1000,
                 }}
-                onClick={() => alert("Requested!!!")}
+                onClick={() => {
+                    if (clickedPosition) {
+                        console.log("Button Clicked Position:", clickedPosition);
+                    } else {
+                        console.log("No position clicked yet");
+                    }
+                }}
             >
                 <DeleteIcon
                     sx={{
