@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
-import { MapContainer, TileLayer, Marker, Popup, useMap, GeoJSON } from "react-leaflet";
+import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import DeleteIcon from "@mui/icons-material/Delete";
-
 import L from "leaflet";
+import { LatLngExpression } from "leaflet";
 
 const locations: [number, number][] = [
     [35.7137757, 139.7969451],
@@ -19,40 +19,43 @@ const locations: [number, number][] = [
 ];
 const zoomLevel = 20;
 
-const MapComponent = ({ position }: { position: [number, number] }) => {
+interface MapComponentProps {
+    position: LatLngExpression;
+}
+
+const MapComponent: React.FC<MapComponentProps> = ({ position }) => {
     const map = useMap();
 
     useEffect(() => {
         if (position) {
-            map.setView([35.7137757, 139.7969451], zoomLevel);
+            map.setView(position, zoomLevel);
         }
     }, [map, position]);
 
     return null;
 };
 
-const Map = () => {
-    const [position, setPosition] = useState<[number, number] | null>(null);
-    const [geoData, setGeoData] = useState(null);
+
+const Map: React.FC = () => {
+    const [position, setPosition] = useState<LatLngExpression | null>(null);
 
     useEffect(() => {
-        // GeoJSONデータの読み込み
-        fetch("/N01-07L-2K_Road.geojson")
-            .then((response) => response.json())
-            .then((data) => setGeoData(data))
-            .catch((error) => console.error("GeoJSONの読み込みに失敗しました:", error));
-    }, []);
+        // http://localhost:8000/にアクセスできるかチェックする
+        fetch("http://localhost:8000/")
+            .then((response) => response.text())
+            .then((text) => console.log("Server Response:", text))
+            .catch((error) => console.error("Server Error:", error));
+    }
+    , []);
 
     useEffect(() => {
         navigator.geolocation.getCurrentPosition(
             (pos) => {
                 const { latitude, longitude } = pos.coords;
                 setPosition([latitude, longitude]);
-                // setPosition([35.7137757, 139.7969451]);
             },
             (err) => {
                 console.error(err);
-                // alert("Can't get your location");
             }
         );
     }, []);
@@ -88,15 +91,12 @@ const Map = () => {
                         <MapComponent position={position} />
                     </>
                 )}
-
                 {/* 配列の各地点にマーカーを配置 */}
                 {locations.map((position, index) => (
                     <Marker key={index} position={position}>
                         <Popup>地点 {index + 1}</Popup>
                     </Marker>
                 ))}
-
-                {geoData && <GeoJSON data={geoData} />}
             </MapContainer>
 
             {/* 右下にボタンを配置 */}
