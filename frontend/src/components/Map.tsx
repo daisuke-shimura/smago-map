@@ -12,7 +12,6 @@ interface MapComponentProps {
 }
 
 const MapComponent: React.FC<MapComponentProps> = ({ position }) => {
-    // マップの位置を変更
     const map = useMap();
 
     useEffect(() => {
@@ -27,8 +26,29 @@ const MapComponent: React.FC<MapComponentProps> = ({ position }) => {
 const MapClickHandler: React.FC<{ setClickedPosition: (pos: LatLngExpression) => void }> = ({ setClickedPosition }) => {
     useMapEvents({
         click: (e) => {
-            setClickedPosition([e.latlng.lat, e.latlng.lng]);
+            const clickedPosition = [e.latlng.lat, e.latlng.lng] as LatLngExpression;
+            setClickedPosition(clickedPosition);
             console.log("Clicked Position:", e.latlng);
+
+            // POSTリクエストをAPIに送信
+            fetch("http://localhost:8000/api/requests", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    latitude: e.latlng.lat,
+                    longitude: e.latlng.lng,
+                }),
+            })
+                .then((response) => {
+                    if (response.ok) {
+                        console.log("Request sent successfully");
+                    } else {
+                        console.error("Failed to send request");
+                    }
+                })
+                .catch((error) => console.error("Error sending request:", error));
         },
     });
     return null;
@@ -38,7 +58,7 @@ const Map: React.FC = () => {
     const [position, setPosition] = useState<LatLngExpression | null>(null);
     const [trashcans, setTrashcans] = useState<Array<{ id: number; latitude: number; longitude: number }>>([]);
     const [requests, setRequests] = useState<Array<{ id: number; latitude: number; longitude: number }>>([]);
-    const [clickedPosition, setClickedPosition] = useState<LatLngExpression | null>(null);
+    const [_, setClickedPosition] = useState<LatLngExpression | null>(null);
 
     useEffect(() => {
         // FastAPIのエンドポイントからゴミ箱の位置を取得
@@ -85,7 +105,6 @@ const Map: React.FC = () => {
                     <>
                         <Marker
                             position={position}
-                            // iconの色を赤に変更
                             icon={L.icon({
                                 iconUrl: "https://cdn.rawgit.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png",
                                 shadowUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.3.1/images/marker-shadow.png",
@@ -97,7 +116,6 @@ const Map: React.FC = () => {
                         >
                             <Popup>Me</Popup>
                         </Marker>
-                        {/* <MapComponent position={position} /> */}
                     </>
                 )}
                 {/* ゴミ箱の位置にマーカーを配置 */}
@@ -108,12 +126,7 @@ const Map: React.FC = () => {
                 ))}
                 {/* リクエストの位置に点を配置 */}
                 {requests.map((request) => (
-                    <Circle
-                        key={request.id}
-                        center={[request.latitude, request.longitude]}
-                        radius={1}
-                        color="red"
-                    >
+                    <Circle key={request.id} center={[request.latitude, request.longitude]} radius={1} color="red">
                         <Popup>リクエスト {request.id}</Popup>
                     </Circle>
                 ))}
@@ -136,13 +149,7 @@ const Map: React.FC = () => {
                     padding: "12px",
                     zIndex: 1000,
                 }}
-                onClick={() => {
-                    if (clickedPosition) {
-                        console.log("Button Clicked Position:", clickedPosition);
-                    } else {
-                        console.log("No position clicked yet");
-                    }
-                }}
+                onClick={() => {}}
             >
                 <DeleteIcon
                     sx={{

@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
 
 app = FastAPI()
 # 5173からのアクセスを許可
@@ -15,6 +16,12 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+class Request(BaseModel):
+    latitude: float
+    longitude: float
+
 
 # ダミーデータ
 trashcans = [
@@ -52,8 +59,14 @@ def get_requests():
 
 
 @app.post("/api/requests")
-def create_request(request: dict):
+def create_request(request: Request):
     new_id = len(requests) + 1
-    new_request = {"id": new_id, **request}
+    new_request = {"id": new_id, "latitude": request.latitude, "longitude": request.longitude}
     requests.append(new_request)
     return {"request": new_request}
+
+
+if __name__ == "__main__":
+    import uvicorn
+
+    uvicorn.run(app, host="0.0.0.0", port=8000)
