@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
+import { MapContainer, TileLayer, Marker, Popup, useMap, GeoJSON } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import DeleteIcon from "@mui/icons-material/Delete";
 
@@ -17,13 +17,14 @@ const locations: [number, number][] = [
     [35.7128488, 139.7960204],
     [35.7112601, 139.7963721],
 ];
+const zoomLevel = 20;
 
 const MapComponent = ({ position }: { position: [number, number] }) => {
     const map = useMap();
 
     useEffect(() => {
         if (position) {
-            map.setView([35.7137757, 139.7969451], 13);
+            map.setView([35.7137757, 139.7969451], zoomLevel);
         }
     }, [map, position]);
 
@@ -32,6 +33,15 @@ const MapComponent = ({ position }: { position: [number, number] }) => {
 
 const Map = () => {
     const [position, setPosition] = useState<[number, number] | null>(null);
+    const [geoData, setGeoData] = useState(null);
+
+    useEffect(() => {
+        // GeoJSONデータの読み込み
+        fetch("/N01-07L-2K_Road.geojson")
+            .then((response) => response.json())
+            .then((data) => setGeoData(data))
+            .catch((error) => console.error("GeoJSONの読み込みに失敗しました:", error));
+    }, []);
 
     useEffect(() => {
         navigator.geolocation.getCurrentPosition(
@@ -51,7 +61,7 @@ const Map = () => {
         <>
             <MapContainer
                 center={position || [35.7137757, 139.7969451]}
-                zoom={20}
+                zoom={zoomLevel}
                 style={{ height: "100vh", width: "100vw" }}
                 zoomControl={false} // ズームコントロールを非表示に設定
             >
@@ -85,6 +95,8 @@ const Map = () => {
                         <Popup>地点 {index + 1}</Popup>
                     </Marker>
                 ))}
+
+                {geoData && <GeoJSON data={geoData} />}
             </MapContainer>
 
             {/* 右下にボタンを配置 */}
