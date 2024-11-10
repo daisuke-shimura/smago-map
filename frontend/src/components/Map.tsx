@@ -3,6 +3,8 @@ import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import DeleteIcon from "@mui/icons-material/Delete";
 
+import L from "leaflet";
+
 const locations: [number, number][] = [
     [35.7137757, 139.7969451],
     [35.7143071, 139.7963245],
@@ -47,14 +49,30 @@ const Map = () => {
 
     return (
         <>
-            <MapContainer center={position || [35.7137757, 139.7969451]} zoom={20} style={{ height: "100vh", width: "100vw" }}>
+            <MapContainer
+                center={position || [35.7137757, 139.7969451]}
+                zoom={20}
+                style={{ height: "100vh", width: "100vw" }}
+                zoomControl={false} // ズームコントロールを非表示に設定
+            >
                 <TileLayer
                     attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                     url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                 />
                 {position && (
                     <>
-                        <Marker position={position}>
+                        <Marker
+                            position={position}
+                            // iconの色を赤に変更
+                            icon={L.icon({
+                                iconUrl: "https://cdn.rawgit.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png",
+                                shadowUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.3.1/images/marker-shadow.png",
+                                iconSize: [25, 41],
+                                iconAnchor: [12, 41],
+                                popupAnchor: [1, -34],
+                                shadowSize: [41, 41],
+                            })}
+                        >
                             <Popup>Me</Popup>
                         </Marker>
                         <MapComponent position={position} />
@@ -90,7 +108,8 @@ const Map = () => {
                 <DeleteIcon
                     sx={{
                         fontSize: 32,
-                    }} />
+                    }}
+                />
             </button>
         </>
     );
