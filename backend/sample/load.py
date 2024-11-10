@@ -1,33 +1,48 @@
 import osmium
+import geojson
 
 
-class ObjectCounterHandler(osmium.SimpleHandler):
-    def __init__(self):
-        osmium.SimpleHandler.__init__(self)
-        self.object_counter = {'node': 0, 'way': 0, 'relation': 0, 'area': 0, 'changeset': 0}
-
-    def count_object(self, key):
-        self.object_counter[key] += 1
+class RoadGeoJSONHandler(osmium.SimpleHandler):
+    def __init__(self, max_nodes=1000, max_ways=1000):
+        super().__init__()
+        self.features = []
+        self.max_nodes = max_nodes
+        self.max_ways = max_ways
+        self.node_count = 0
+        self.way_count = 0
 
     def node(self, n):
-        self.count_object("node")
+        print(n)
+        if self.node_count >= self.max_nodes:
+            return
+        self.node_count += 1
+        # ノードの処理をここに追加
 
     def way(self, w):
-        self.count_object("way")
+        print(w)
+        if self.way_count >= self.max_ways:
+            return
+        self.way_count += 1
+        if 'highway' in w.tags:
+            coordinates = [(node.lon, node.lat) for node in w.nodes if node.location.valid()]
+            if coordinates:
+                feature = geojson.Feature(
+                    geometry=geojson.LineString(coordinates),
+                    properties={"highway": w.tags["highway"]}
+                )
+                self.features.append(feature)
 
-    def relation(self, r):
-        self.count_object("relation")
-
-    def area(self, a):
-        self.count_object("area")
-
-    def changeset(self, c):
-        self.count_object("changeset")
+    def save_to_geojson(self, output_path):
+        feature_collection = geojson.FeatureCollection(self.features)
+        with open(output_path, 'w') as f:
+            geojson.dump(feature_collection, f, ensure_ascii=False, indent=2)
 
 
 if __name__ == '__main__':
-    # file_path = "./data/japan-latest.osm.pbf"
     file_path = "./data/shikoku-latest.osm.pbf"
-    h = ObjectCounterHandler()
-    h.apply_file(file_path)
-    print(h.object_counter)
+    output_path = "./data/roads.geojson"
+
+    handler = RoadGeoJSONHandler(max_nodes=1000, max_ways=1000)
+    handler.apply_file(file_path)
+    handler.save_to_geojson(output_path)
+    print(f"Road data has been saved to {output_path}")
