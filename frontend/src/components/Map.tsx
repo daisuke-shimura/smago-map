@@ -5,6 +5,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import L from "leaflet";
 import { LatLngExpression } from "leaflet";
 
+const apiEndpoint = "http://localhost:8000/api";
 const zoomLevel = 20;
 
 interface MapComponentProps {
@@ -23,7 +24,7 @@ const MapComponent: React.FC<MapComponentProps> = ({ position }) => {
     return null;
 };
 
-const MapClickHandler: React.FC<{ setClickedPosition: (pos: LatLngExpression) => void }> = ({ setClickedPosition }) => {
+const MapClickHandler: React.FC<{ setClickedPosition: (pos: LatLngExpression) => void; addRequest: (pos: LatLngExpression) => void }> = ({ setClickedPosition, addRequest }) => {
     useMapEvents({
         click: (e) => {
             const clickedPosition = [e.latlng.lat, e.latlng.lng] as LatLngExpression;
@@ -31,7 +32,7 @@ const MapClickHandler: React.FC<{ setClickedPosition: (pos: LatLngExpression) =>
             console.log("Clicked Position:", e.latlng);
 
             // POSTリクエストをAPIに送信
-            fetch("http://localhost:8000/api/requests", {
+            fetch(`${apiEndpoint}/requests`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -44,6 +45,7 @@ const MapClickHandler: React.FC<{ setClickedPosition: (pos: LatLngExpression) =>
                 .then((response) => {
                     if (response.ok) {
                         console.log("Request sent successfully");
+                        addRequest(clickedPosition);
                     } else {
                         console.error("Failed to send request");
                     }
@@ -62,7 +64,7 @@ const Map: React.FC = () => {
 
     useEffect(() => {
         // FastAPIのエンドポイントからゴミ箱の位置を取得
-        fetch("http://localhost:8000/api/trashcans")
+        fetch(apiEndpoint + "/trashcans")
             .then((response) => response.json())
             .then((data) => setTrashcans(data.trashcans))
             .catch((error) => console.error("Error fetching trashcans:", error));
@@ -70,7 +72,7 @@ const Map: React.FC = () => {
 
     useEffect(() => {
         // FastAPIのエンドポイントからリクエストの位置を取得
-        fetch("http://localhost:8000/api/requests")
+        fetch(apiEndpoint + "/requests")
             .then((response) => response.json())
             .then((data) => setRequests(data.requests))
             .catch((error) => console.error("Error fetching requests:", error));
@@ -88,6 +90,13 @@ const Map: React.FC = () => {
             }
         );
     }, []);
+
+    const addRequest = (pos: LatLngExpression) => {
+        setRequests((prevRequests) => [
+            ...prevRequests,
+            { id: prevRequests.length + 1, latitude: (pos as [number, number])[0], longitude: (pos as [number, number])[1] },
+        ]);
+    };
 
     return (
         <>
@@ -130,7 +139,7 @@ const Map: React.FC = () => {
                         <Popup>リクエスト {request.id}</Popup>
                     </Circle>
                 ))}
-                <MapClickHandler setClickedPosition={setClickedPosition} />
+                <MapClickHandler setClickedPosition={setClickedPosition} addRequest={addRequest} />
             </MapContainer>
 
             {/* 右下にボタンを配置 */}
