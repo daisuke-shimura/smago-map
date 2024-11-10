@@ -41,7 +41,7 @@ const Map: React.FC = () => {
 
     useEffect(() => {
         // http://localhost:8000/にアクセスできるかチェックする
-        fetch("http://localhost:8000/")
+        fetch("http://localhost:8000/api")
             .then((response) => response.text())
             .then((text) => console.log("Server Response:", text))
             .catch((error) => console.error("Server Error:", error));
