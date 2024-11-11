@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
-import { MapContainer, TileLayer, Marker, Popup, useMap, Circle, useMapEvents } from "react-leaflet";
+import { MapContainer, TileLayer, Marker, Popup, useMap, Circle, useMapEvents, Polyline } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import DeleteIcon from "@mui/icons-material/Delete";
 import L from "leaflet";
 import { LatLngExpression } from "leaflet";
+import polyline from "@mapbox/polyline";
 
 const apiEndpoint = "http://localhost:8000/api";
 const zoomLevel = 20;
@@ -24,7 +25,10 @@ const MapComponent: React.FC<MapComponentProps> = ({ position }) => {
     return null;
 };
 
-const MapClickHandler: React.FC<{ setClickedPosition: (pos: LatLngExpression) => void; addRequest: (pos: LatLngExpression) => void }> = ({ setClickedPosition, addRequest }) => {
+const MapClickHandler: React.FC<{ setClickedPosition: (pos: LatLngExpression) => void; addRequest: (pos: LatLngExpression) => void }> = ({
+    setClickedPosition,
+    addRequest,
+}) => {
     useMapEvents({
         click: (e) => {
             const clickedPosition = [e.latlng.lat, e.latlng.lng] as LatLngExpression;
@@ -61,6 +65,7 @@ const Map: React.FC = () => {
     const [trashcans, setTrashcans] = useState<Array<{ id: number; latitude: number; longitude: number }>>([]);
     const [requests, setRequests] = useState<Array<{ id: number; latitude: number; longitude: number }>>([]);
     const [_, setClickedPosition] = useState<LatLngExpression | null>(null);
+    const [route, setRoute] = useState<[number, number][]>([]);
 
     useEffect(() => {
         // FastAPIのエンドポイントからゴミ箱の位置を取得
@@ -97,6 +102,20 @@ const Map: React.FC = () => {
             { id: prevRequests.length + 1, latitude: (pos as [number, number])[0], longitude: (pos as [number, number])[1] },
         ]);
     };
+
+    useEffect(() => {
+        const fetchRoute = async () => {
+            try {
+                const response = await fetch(apiEndpoint + "/route");
+                const data = await response.json();
+                const decodedRoute = polyline.decode(data.polyline_points);
+                setRoute(decodedRoute);
+            } catch (error) {
+                console.error("Error fetching route:", error);
+            }
+        };
+        fetchRoute();
+    }, []);
 
     return (
         <>
@@ -139,6 +158,7 @@ const Map: React.FC = () => {
                         <Popup>リクエスト {request.id}</Popup>
                     </Circle>
                 ))}
+                {route.length > 0 && <Polyline positions={route} color="blue" />}
                 <MapClickHandler setClickedPosition={setClickedPosition} addRequest={addRequest} />
             </MapContainer>
 
