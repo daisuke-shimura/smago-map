@@ -229,6 +229,12 @@ const Map: React.FC = () => {
                 <Menu/>
                 <MenuIcon style={{width: "30px", height: "30px", padding: "5px 10px 3px"}}/>
             </div>
+
+            {/*ページ名(消しちゃっていいです)*/}
+            <p style={{position: "absolute", top: "3px", left: "75px",
+                      backgroundColor: "#ffffff", color: "#000000", zIndex: 1000,}}>
+              観光客の画面
+            </p>
         </>
     );
 };
