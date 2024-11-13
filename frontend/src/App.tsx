@@ -20,12 +20,6 @@ function App() {
 
         <BrowserRouter>
         <div className="App">
-          <Link to="/">Customer</Link>
-          <br />
-          <Link to="/Shop">Shop</Link>
-          <br />
-          <Link to="/Delivery">Delivery</Link>
-          <br />
           <Routes>
             <Route path="/" element={<Customer />} />
             <Route path="/Delivery/" element={<Delivery />} />

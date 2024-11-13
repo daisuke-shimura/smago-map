@@ -8,8 +8,8 @@ const Shop = () => {
       <h1>自治体・お店の画面</h1>
       {/*ハンバーガーメニュー*/}
       <div style={{position: "absolute",top: "0px",left: "0px",}}>
-        
-        <MenuIcon style={{width: "30px", height: "30px", padding: "5px 10px"}}/>
+        <Menu/>
+        <MenuIcon style={{width: "30px", height: "30px", padding: "5px 10px 3px"}}/>
       </div>
     </div>
   );

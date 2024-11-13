@@ -6,7 +6,7 @@ import L from "leaflet";
 import { LatLngExpression } from "leaflet";
 import polyline from "@mapbox/polyline";
 {/*ハンバーガーメニュー */}
-
+import Menu from "./Menu";
 import MenuIcon from '@mui/icons-material/Menu';
 
 const apiEndpoint = "http://localhost:8000/api";
@@ -216,33 +216,18 @@ const Map: React.FC = () => {
                     }}
                 />
             </button>
-            <button
-                style={{
-                    position: "absolute",
-                    top: "20px",
-                    left: "50px",
-                    backgroundColor: "#3a5bf0",
-                    color: "white",
-                    border: "none",
-                    borderRadius: "5px",
-                    cursor: "pointer",
-                    display: "flex",
-                    alignItems: "center",
-                    padding: "12px",
-                    zIndex: 1000,
-                }}
-                onClick={() => {}}
-            >
-                <DeleteIcon
-                    sx={{
-                        fontSize: 32,
-                    }}
-                />
-            </button>
+            
             {/*ハンバーガーメニュー*/}
-            <div style={{position: "absolute",top: "0px",left: "0px",}}>
-                
-                <MenuIcon style={{width: "30px", height: "30px", padding: "5px 10px"}}/>
+            <div style={{position: "absolute",top: "0px",left: "0px", 
+                backgroundColor: "#c0c0c0",
+                color: "white",
+                border: "none",
+                borderRadius: "5px",
+                cursor: "pointer",
+                alignItems: "center",
+                zIndex: 1000,}}>
+                <Menu/>
+                <MenuIcon style={{width: "30px", height: "30px", padding: "5px 10px 3px"}}/>
             </div>
         </>
     );
