@@ -182,14 +182,10 @@ const Map: React.FC = () => {
                         </Marker>
                     ))}
 
-                {/* リクエストの位置に点を配置 */}
-                {requests.map((request) => (
-                    <Circle key={request.id} center={[request.latitude, request.longitude]} radius={1} color="red">
-                        <Popup>request {request.id}</Popup>
-                    </Circle>
-                ))}
+                {/* ルートの表示 */}
                 {route.length > 0 && <Polyline positions={route} color="blue" />}
                 <MapClickHandler setClickedPosition={setClickedPosition} addRequest={addRequest} />
+                
             </MapContainer>
 
             {/* 右下にボタンを配置 */}
@@ -219,7 +215,7 @@ const Map: React.FC = () => {
             
             {/*ハンバーガーメニュー*/}
             <div style={{position: "absolute",top: "0px",left: "0px", 
-                backgroundColor: "#c0c0c0",
+                backgroundColor: "#3a5bf0",
                 color: "white",
                 border: "none",
                 borderRadius: "5px",
@@ -227,7 +223,7 @@ const Map: React.FC = () => {
                 alignItems: "center",
                 zIndex: 1000,}}>
                 <Menu/>
-                <MenuIcon style={{width: "30px", height: "30px", padding: "5px 10px 3px"}}/>
+                <MenuIcon style={{width: "30px", height: "30px", padding: "5px 10px 1px"}}/>
             </div>
             {/*ページ名(消しちゃっていいです)*/}
             <p style={{position: "absolute", top: "3px", left: "75px",

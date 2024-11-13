@@ -62,7 +62,7 @@ const MapClickHandler: React.FC<{ setClickedPosition: (pos: LatLngExpression) =>
     });
     return null;
 };
-
+  
 const Map: React.FC = () => {
     const [position, setPosition] = useState<LatLngExpression | null>(null);
     const [trashcans, setTrashcans] = useState<Array<{ id: number; latitude: number; longitude: number; status: string }>>([]);
@@ -140,7 +140,7 @@ const Map: React.FC = () => {
             shadowSize: [41, 41],
         });
     };
-
+    
     return (
         <>
             <MapContainer
@@ -181,15 +181,7 @@ const Map: React.FC = () => {
                             </Popup>
                         </Marker>
                     ))}
-
-                {/* リクエストの位置に点を配置 */}
-                {requests.map((request) => (
-                    <Circle key={request.id} center={[request.latitude, request.longitude]} radius={1} color="red">
-                        <Popup>request {request.id}</Popup>
-                    </Circle>
-                ))}
-                {route.length > 0 && <Polyline positions={route} color="blue" />}
-                <MapClickHandler setClickedPosition={setClickedPosition} addRequest={addRequest} />
+                    
             </MapContainer>
 
             {/* 右下にボタンを配置 */}
@@ -219,15 +211,15 @@ const Map: React.FC = () => {
             
             {/*ハンバーガーメニュー*/}
             <div style={{position: "absolute",top: "0px",left: "0px", 
-                backgroundColor: "#c0c0c0",
+                backgroundColor: "#3a5bf0",
                 color: "white",
                 border: "none",
                 borderRadius: "5px",
                 cursor: "pointer",
                 alignItems: "center",
                 zIndex: 1000,}}>
-                <Menu/>
-                <MenuIcon style={{width: "30px", height: "30px", padding: "5px 10px 3px"}}/>
+                <Menu />
+                <MenuIcon style={{width: "30px", height: "30px", padding: "5px 10px 1px"}}/>
             </div>
 
             {/*ページ名(消しちゃっていいです)*/}

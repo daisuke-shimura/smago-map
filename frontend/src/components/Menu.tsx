@@ -3,8 +3,8 @@ import { slide as Menu } from "react-burger-menu";
 import { BrowserRouter, Link, Route, Routes } from "react-router-dom";
 
 import GroupsIcon from '@mui/icons-material/Groups';
-import StoreIcon from '@mui/icons-material/Store';
-import LocationOnIcon from '@mui/icons-material/LocationOn';
+import BusinessIcon from '@mui/icons-material/Business';
+import LocalShippingIcon from '@mui/icons-material/LocalShipping';
 
 const MenuComponent = () => {
   return (
@@ -26,11 +26,11 @@ const MenuComponent = () => {
         </style>
       </div>
         <br /><br /><br />
-        <Link to="/" className="menu-item" >　<GroupsIcon /> Customer</Link>
+        <Link to="/" className="menu-item" >　<GroupsIcon /> For Tourist</Link>
         <br />
-        <Link to="/Shop" className="menu-item" >　<StoreIcon /> Shop</Link>
+        <Link to="/Shop" className="menu-item" >　<BusinessIcon /> For Local Government</Link>
         <br />
-        <Link to="/Delivery" className="menu-item" >　<LocationOnIcon /> Delivery</Link>
+        <Link to="/Delivery" className="menu-item" >　<LocalShippingIcon /> For Garbase Collector</Link>
     </Menu>
   );
 };
