@@ -12,15 +12,18 @@ const MenuComponent = () => {
       <div>
         <style>
           {`
-            .menu-box{
-              margin: 10px;
-            }
             .menu-item {
-              color: black;
-              text-decoration: none;
+                color: #000;
+                text-decoration: none;
+                padding: 0 10px;
+                background-image: linear-gradient(to right, rgba(0, 0, 0, 0) 50%, rgb(256, 256, 256) 50%);
+                background-position: 0 0;
+                background-size: 200% auto;
+                transition: .3s;
             }
             .menu-item:hover {
-              color: #696969;
+                background-position: -100% 0;
+                color: #000;
             }
           `}
         </style>
